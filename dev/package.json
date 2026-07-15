@@ -1,0 +1,9 @@
+{
+  "name": "lnbits-supportchat-wasm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:wasm": "node scripts/bundle.mjs && npx --yes @bytecodealliance/jco componentize dist/index.bundle.js --disable all --enable clocks --enable random --enable stdio --wit ../wasm/lnbits-extension.wit --world-name supportchat -o ../wasm/module.wasm",
+    "check": "node --check src/index.js"
+  }
+}

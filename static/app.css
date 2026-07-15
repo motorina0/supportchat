@@ -1,0 +1,146 @@
+[v-cloak] {
+  display: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #121212;
+  color: #f4f4f4;
+}
+
+.sc-shell {
+  min-height: 100vh;
+  background: #121212;
+}
+
+.sc-panel {
+  background: #1d1d1d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.sc-muted {
+  color: #a6a6a6;
+}
+
+.sc-list {
+  max-height: 42vh;
+  overflow: auto;
+}
+
+.sc-thread {
+  height: min(58vh, 620px);
+  min-height: 320px;
+  overflow: auto;
+}
+
+.sc-message {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.sc-message--agent {
+  justify-content: flex-end;
+}
+
+.sc-bubble {
+  width: fit-content;
+  max-width: min(78%, 640px);
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #2b2b2b;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sc-message--agent .sc-bubble {
+  background: #263d33;
+}
+
+.sc-message-meta {
+  margin-bottom: 4px;
+  color: #bdbdbd;
+  font-size: 12px;
+}
+
+.sc-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: #a6a6a6;
+}
+
+.sc-input {
+  display: block;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  background: #161616;
+  color: #f4f4f4;
+  outline: none;
+}
+
+.sc-input:focus {
+  border-color: #f2a900;
+}
+
+textarea.sc-input {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.sc-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.sc-row:hover,
+.sc-row--active {
+  background: rgba(242, 169, 0, 0.16);
+}
+
+.sc-row small,
+.sc-row strong {
+  display: block;
+}
+
+.sc-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f4f4;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sc-url {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.sc-public-card {
+  width: min(840px, 100%);
+}
+
+@media (max-width: 599px) {
+  .sc-thread {
+    height: 48vh;
+  }
+
+  .sc-bubble {
+    max-width: 92%;
+  }
+}

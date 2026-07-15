@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "tables": {
+    "inboxes": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "welcome_message",
+          "type": "string"
+        },
+        {
+          "name": "is_active",
+          "type": "boolean"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime"
+        }
+      ]
+    },
+    "conversations": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "inbox_id",
+          "type": "string"
+        },
+        {
+          "name": "visitor_name",
+          "type": "string"
+        },
+        {
+          "name": "visitor_email",
+          "type": "string"
+        },
+        {
+          "name": "subject",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime"
+        },
+        {
+          "name": "last_message_at",
+          "type": "datetime"
+        }
+      ]
+    },
+    "messages": {
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "conversation_id",
+          "type": "string"
+        },
+        {
+          "name": "inbox_id",
+          "type": "string"
+        },
+        {
+          "name": "sender_type",
+          "type": "string"
+        },
+        {
+          "name": "sender_name",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime"
+        }
+      ]
+    }
+  },
+  "indexes": [
+    {
+      "table": "conversations",
+      "name": "conversations_by_inbox",
+      "field": "inbox_id"
+    },
+    {
+      "table": "messages",
+      "name": "messages_by_conversation",
+      "field": "conversation_id"
+    },
+    {
+      "table": "messages",
+      "name": "messages_by_inbox",
+      "field": "inbox_id"
+    }
+  ]
+}

@@ -1,0 +1,281 @@
+{
+  "id": "supportchat",
+  "name": "Support Chat",
+  "short_description": "Run simple public support inboxes with live chat threads.",
+  "version": "0.0.1",
+  "min_lnbits_version": "1.5.6",
+
+  "extension_type": "wasm",
+  "wasm": {
+    "module": "wasm/module.wasm",
+    "exports": [
+      {
+        "name": "create-inbox",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "update-inbox",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "list-inboxes",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "delete-inbox",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "list-conversations",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "list-messages",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "reply-conversation",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "resolve-conversation",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "get-public-inbox",
+        "visibility": "public"
+      },
+      {
+        "name": "start-conversation",
+        "visibility": "public"
+      },
+      {
+        "name": "get-public-conversation",
+        "visibility": "public"
+      },
+      {
+        "name": "post-public-message",
+        "visibility": "public"
+      }
+    ]
+  },
+  "ui_routes": [
+    {
+      "path": "/supportchat",
+      "entrypoint": "ui/admin.html",
+      "auth": "user"
+    },
+    {
+      "path": "/supportchat/i/{inbox_id}",
+      "entrypoint": "ui/public.html",
+      "auth": "public",
+      "path_params": {
+        "inbox_id": "inboxId"
+      }
+    },
+    {
+      "path": "/supportchat/c/{conversation_id}",
+      "entrypoint": "ui/public.html",
+      "auth": "public",
+      "path_params": {
+        "conversation_id": "conversationId"
+      }
+    }
+  ],
+  "api_routes": [
+    {
+      "method": "POST",
+      "path": "/inboxes",
+      "export": "create-inbox",
+      "auth": "user"
+    },
+    {
+      "method": "PUT",
+      "path": "/inboxes/{inbox_id}",
+      "export": "update-inbox",
+      "auth": "user",
+      "path_params": {
+        "inbox_id": "inboxId"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/inboxes",
+      "export": "list-inboxes",
+      "auth": "user"
+    },
+    {
+      "method": "DELETE",
+      "path": "/inboxes/{inbox_id}",
+      "export": "delete-inbox",
+      "auth": "user",
+      "path_params": {
+        "inbox_id": "inboxId"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/inboxes/{inbox_id}/conversations",
+      "export": "list-conversations",
+      "auth": "user",
+      "path_params": {
+        "inbox_id": "inboxId"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/conversations/{conversation_id}/messages",
+      "export": "list-messages",
+      "auth": "user",
+      "path_params": {
+        "conversation_id": "conversationId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/conversations/{conversation_id}/reply",
+      "export": "reply-conversation",
+      "auth": "user",
+      "path_params": {
+        "conversation_id": "conversationId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/conversations/{conversation_id}/resolve",
+      "export": "resolve-conversation",
+      "auth": "user",
+      "path_params": {
+        "conversation_id": "conversationId"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/public/inboxes/{inbox_id}",
+      "export": "get-public-inbox",
+      "auth": "public",
+      "path_params": {
+        "inbox_id": "inboxId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/public/inboxes/{inbox_id}/conversations",
+      "export": "start-conversation",
+      "auth": "public",
+      "path_params": {
+        "inbox_id": "inboxId"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/public/conversations/{conversation_id}",
+      "export": "get-public-conversation",
+      "auth": "public",
+      "path_params": {
+        "conversation_id": "conversationId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/public/conversations/{conversation_id}/messages",
+      "export": "post-public-message",
+      "auth": "public",
+      "path_params": {
+        "conversation_id": "conversationId"
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "id": "ext.storage.read",
+      "description": "Read support chat inboxes, conversations, and messages."
+    },
+    {
+      "id": "ext.storage.write",
+      "description": "Create and update support chat inboxes, conversations, and messages."
+    },
+    {
+      "id": "ext.storage.read_public",
+      "description": "Read public support inbox and conversation fields.",
+      "policies": [
+        {
+          "table_name": "inboxes",
+          "public_fields": [
+            "id",
+            "name",
+            "welcome_message",
+            "is_active"
+          ]
+        },
+        {
+          "table_name": "conversations",
+          "public_fields": [
+            "id",
+            "inbox_id",
+            "visitor_name",
+            "subject",
+            "status",
+            "created_at",
+            "updated_at",
+            "last_message_at"
+          ]
+        },
+        {
+          "table_name": "messages",
+          "public_fields": [
+            "id",
+            "conversation_id",
+            "inbox_id",
+            "sender_type",
+            "sender_name",
+            "body",
+            "created_at"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ext.storage.append_public",
+      "description": "Create public conversations and visitor messages.",
+      "policies": [
+        {
+          "table": "conversations",
+          "source_table": "inboxes",
+          "source_id_field": "inbox_id",
+          "allowed_fields": [
+            "visitor_name",
+            "visitor_email",
+            "subject",
+            "status",
+            "created_at",
+            "updated_at",
+            "last_message_at"
+          ],
+          "max_rows_per_source": 10000
+        },
+        {
+          "table": "messages",
+          "source_table": "conversations",
+          "source_id_field": "conversation_id",
+          "allowed_fields": [
+            "inbox_id",
+            "sender_type",
+            "sender_name",
+            "body",
+            "created_at"
+          ],
+          "max_rows_per_source": 1000
+        }
+      ]
+    },
+    {
+      "id": "websocket.publish",
+      "description": "Publish live support chat updates to extension websocket channels."
+    },
+    {
+      "id": "websocket.subscribe",
+      "description": "Subscribe support chat pages to extension websocket channels."
+    }
+  ]
+}
