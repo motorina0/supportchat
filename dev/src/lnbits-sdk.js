@@ -45,8 +45,9 @@ export const storage = {
     return paginated(storageGetPaginated, table, options)
   },
 
-  getPublicPaginated(table, options = {}) {
-    return paginated(storageGetPublicPaginated, table, options)
+  getPublicPaginated(table, sourceId, options = {}) {
+    if (!sourceId) throw new Error('sourceId is required')
+    return paginated(storageGetPublicPaginated, table, options, {sourceId})
   },
 
   delete(table, id) {
@@ -77,8 +78,9 @@ export const system = {
   }
 }
 
-function paginated(fn, table, options = {}) {
+function paginated(fn, table, options = {}, extra = {}) {
   const {rowsJson, total} = fn({
+    ...extra,
     table,
     filtersJson: JSON.stringify(options.filters || {}),
     search: options.search || '',

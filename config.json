@@ -210,6 +210,7 @@
         },
         {
           "table_name": "conversations",
+          "source_id_field": "inbox_id",
           "public_fields": [
             "id",
             "inbox_id",
@@ -223,6 +224,7 @@
         },
         {
           "table_name": "messages",
+          "source_id_field": "conversation_id",
           "public_fields": [
             "id",
             "conversation_id",

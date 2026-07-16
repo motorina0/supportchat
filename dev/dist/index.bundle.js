@@ -45,8 +45,9 @@ const storage = {
     return paginated(storageGetPaginated, table, options)
   },
 
-  getPublicPaginated(table, options = {}) {
-    return paginated(storageGetPublicPaginated, table, options)
+  getPublicPaginated(table, sourceId, options = {}) {
+    if (!sourceId) throw new Error('sourceId is required')
+    return paginated(storageGetPublicPaginated, table, options, {sourceId})
   },
 
   delete(table, id) {
@@ -77,8 +78,9 @@ const system = {
   }
 }
 
-function paginated(fn, table, options = {}) {
+function paginated(fn, table, options = {}, extra = {}) {
   const {rowsJson, total} = fn({
+    ...extra,
     table,
     filtersJson: JSON.stringify(options.filters || {}),
     search: options.search || '',
@@ -361,8 +363,7 @@ export function getPublicConversation(requestJson) {
     )
     const conversation = getPublicConversationById(conversationId)
     const inbox = getPublicInboxById(conversation.inbox_id)
-    const messages = storage.getPublicPaginated(MESSAGES_TABLE, {
-      filters: {conversation_id: conversationId},
+    const messages = storage.getPublicPaginated(MESSAGES_TABLE, conversationId, {
       sortBy: 'created_at',
       descending: false,
       limit: normalizePageSize(request.rowsPerPage, 200),

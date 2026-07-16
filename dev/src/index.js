@@ -266,8 +266,7 @@ export function getPublicConversation(requestJson) {
     )
     const conversation = getPublicConversationById(conversationId)
     const inbox = getPublicInboxById(conversation.inbox_id)
-    const messages = storage.getPublicPaginated(MESSAGES_TABLE, {
-      filters: {conversation_id: conversationId},
+    const messages = storage.getPublicPaginated(MESSAGES_TABLE, conversationId, {
       sortBy: 'created_at',
       descending: false,
       limit: normalizePageSize(request.rowsPerPage, 200),
