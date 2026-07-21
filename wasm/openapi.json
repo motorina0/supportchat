@@ -1,0 +1,754 @@
+{
+  "schemas": {
+    "ApiErrorResult": {
+      "type": "object",
+      "required": ["ok", "error"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [false]},
+        "error": {"type": "string"}
+      }
+    },
+    "HttpError": {
+      "type": "object",
+      "properties": {
+        "detail": {"type": "string"}
+      }
+    },
+    "Inbox": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "welcomeMessage",
+        "isActive",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "welcomeMessage": {"type": "string"},
+        "isActive": {"type": "boolean"},
+        "createdAt": {"type": "integer", "format": "int64"},
+        "updatedAt": {"type": "integer", "format": "int64"}
+      }
+    },
+    "Conversation": {
+      "type": "object",
+      "required": [
+        "id",
+        "inboxId",
+        "visitorName",
+        "subject",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "lastMessageAt"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "inboxId": {"type": "string"},
+        "visitorName": {"type": "string"},
+        "subject": {"type": "string"},
+        "status": {"type": "string", "enum": ["open", "resolved"]},
+        "createdAt": {"type": "integer", "format": "int64"},
+        "updatedAt": {"type": "integer", "format": "int64"},
+        "lastMessageAt": {"type": "integer", "format": "int64"}
+      }
+    },
+    "PrivateConversation": {
+      "allOf": [
+        {"$ref": "#/schemas/Conversation"},
+        {
+          "type": "object",
+          "properties": {
+            "visitorEmail": {"type": "string"}
+          }
+        }
+      ]
+    },
+    "Message": {
+      "type": "object",
+      "required": [
+        "id",
+        "conversationId",
+        "inboxId",
+        "senderType",
+        "senderName",
+        "body",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "conversationId": {"type": "string"},
+        "inboxId": {"type": "string"},
+        "senderType": {"type": "string", "enum": ["agent", "visitor"]},
+        "senderName": {"type": "string"},
+        "body": {"type": "string"},
+        "createdAt": {"type": "integer", "format": "int64"}
+      }
+    },
+    "CreateInboxRequest": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "maxLength": 128},
+        "name": {"type": "string", "maxLength": 80},
+        "welcomeMessage": {"type": "string", "maxLength": 280},
+        "isActive": {"type": "boolean"}
+      }
+    },
+    "UpdateInboxRequest": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "maxLength": 80},
+        "welcomeMessage": {"type": "string", "maxLength": 280},
+        "isActive": {"type": "boolean"}
+      }
+    },
+    "ReplyConversationRequest": {
+      "type": "object",
+      "required": ["body"],
+      "properties": {
+        "name": {"type": "string", "maxLength": 80},
+        "body": {"type": "string", "maxLength": 2000},
+        "message": {"type": "string", "maxLength": 2000}
+      }
+    },
+    "StartConversationRequest": {
+      "type": "object",
+      "required": ["body"],
+      "properties": {
+        "name": {"type": "string", "maxLength": 80},
+        "email": {"type": "string", "maxLength": 160},
+        "subject": {"type": "string", "maxLength": 120},
+        "body": {"type": "string", "maxLength": 2000},
+        "message": {"type": "string", "maxLength": 2000}
+      }
+    },
+    "PublicMessageRequest": {
+      "type": "object",
+      "required": ["body"],
+      "properties": {
+        "name": {"type": "string", "maxLength": 80},
+        "body": {"type": "string", "maxLength": 2000},
+        "message": {"type": "string", "maxLength": 2000}
+      }
+    },
+    "InboxResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["inbox"],
+          "properties": {
+            "inbox": {"$ref": "#/schemas/Inbox"}
+          }
+        }
+      }
+    },
+    "InboxListResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["inboxes", "total"],
+          "properties": {
+            "inboxes": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/Inbox"}
+            },
+            "total": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "DeleteInboxResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["id", "deleted"],
+          "properties": {
+            "id": {"type": "string"},
+            "deleted": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "ConversationListResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["inbox", "conversations", "total"],
+          "properties": {
+            "inbox": {"$ref": "#/schemas/Inbox"},
+            "conversations": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/PrivateConversation"}
+            },
+            "total": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "MessageListResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["conversation", "messages", "total"],
+          "properties": {
+            "conversation": {"$ref": "#/schemas/PrivateConversation"},
+            "messages": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/Message"}
+            },
+            "total": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "ReplyConversationResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["conversation", "message"],
+          "properties": {
+            "conversation": {"$ref": "#/schemas/PrivateConversation"},
+            "message": {"$ref": "#/schemas/Message"}
+          }
+        }
+      }
+    },
+    "ResolveConversationResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["conversation"],
+          "properties": {
+            "conversation": {"$ref": "#/schemas/PrivateConversation"}
+          }
+        }
+      }
+    },
+    "StartConversationResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["inbox", "conversation", "messages"],
+          "properties": {
+            "inbox": {"$ref": "#/schemas/Inbox"},
+            "conversation": {"$ref": "#/schemas/Conversation"},
+            "messages": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/Message"}
+            }
+          }
+        }
+      }
+    },
+    "PublicConversationResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["inbox", "conversation", "messages", "total"],
+          "properties": {
+            "inbox": {"$ref": "#/schemas/Inbox"},
+            "conversation": {"$ref": "#/schemas/Conversation"},
+            "messages": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/Message"}
+            },
+            "total": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "PublicMessageResponse": {
+      "type": "object",
+      "required": ["ok", "data"],
+      "properties": {
+        "ok": {"type": "boolean", "enum": [true]},
+        "data": {
+          "type": "object",
+          "required": ["conversation", "message"],
+          "properties": {
+            "conversation": {"$ref": "#/schemas/Conversation"},
+            "message": {"$ref": "#/schemas/Message"}
+          }
+        }
+      }
+    }
+  },
+  "commonResponses": {
+    "400": {
+      "description": "Invalid request payload or route configuration.",
+      "content": {
+        "application/json": {"schema": {"$ref": "#/schemas/HttpError"}}
+      }
+    },
+    "403": {
+      "description": "The user is not allowed to call this extension route.",
+      "content": {
+        "application/json": {"schema": {"$ref": "#/schemas/HttpError"}}
+      }
+    },
+    "404": {
+      "description": "The requested WASM export or resource was not found.",
+      "content": {
+        "application/json": {"schema": {"$ref": "#/schemas/HttpError"}}
+      }
+    },
+    "413": {
+      "description": "The request body exceeded the extension runtime limit.",
+      "content": {
+        "application/json": {"schema": {"$ref": "#/schemas/HttpError"}}
+      }
+    }
+  },
+  "routes": {
+    "create-inbox": {
+      "summary": "Create inbox",
+      "description": "Creates a support inbox for the authenticated user.",
+      "operationId": "supportchat_create_inbox",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {"schema": {"$ref": "#/schemas/CreateInboxRequest"}}
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Inbox details or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/InboxResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "413": {"$ref": "#/commonResponses/413"}
+      }
+    },
+    "update-inbox": {
+      "summary": "Update inbox",
+      "description": "Updates inbox display text and active status.",
+      "operationId": "supportchat_update_inbox",
+      "parameters": [
+        {
+          "name": "inbox_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {"schema": {"$ref": "#/schemas/UpdateInboxRequest"}}
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Updated inbox details or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/InboxResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "404": {"$ref": "#/commonResponses/404"},
+        "413": {"$ref": "#/commonResponses/413"}
+      }
+    },
+    "list-inboxes": {
+      "summary": "List inboxes",
+      "description": "Returns the authenticated user's support inboxes.",
+      "operationId": "supportchat_list_inboxes",
+      "parameters": [
+        {"name": "search", "in": "query", "schema": {"type": "string"}},
+        {
+          "name": "sortBy",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": ["name", "created_at", "updated_at"]
+          }
+        },
+        {"name": "descending", "in": "query", "schema": {"type": "boolean"}},
+        {"name": "page", "in": "query", "schema": {"type": "integer"}},
+        {"name": "rowsPerPage", "in": "query", "schema": {"type": "integer"}}
+      ],
+      "responses": {
+        "200": {
+          "description": "Inbox list or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/InboxListResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"}
+      }
+    },
+    "delete-inbox": {
+      "summary": "Delete inbox",
+      "description": "Deletes an inbox that has no conversations.",
+      "operationId": "supportchat_delete_inbox",
+      "parameters": [
+        {
+          "name": "inbox_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Deletion result or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/DeleteInboxResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "404": {"$ref": "#/commonResponses/404"}
+      }
+    },
+    "list-conversations": {
+      "summary": "List conversations",
+      "description": "Returns conversations for an inbox.",
+      "operationId": "supportchat_list_conversations",
+      "parameters": [
+        {
+          "name": "inbox_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {"name": "search", "in": "query", "schema": {"type": "string"}},
+        {
+          "name": "sortBy",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": ["created_at", "updated_at", "last_message_at", "visitor_name"]
+          }
+        },
+        {"name": "descending", "in": "query", "schema": {"type": "boolean"}},
+        {"name": "page", "in": "query", "schema": {"type": "integer"}},
+        {"name": "rowsPerPage", "in": "query", "schema": {"type": "integer"}}
+      ],
+      "responses": {
+        "200": {
+          "description": "Conversation list or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/ConversationListResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "404": {"$ref": "#/commonResponses/404"}
+      }
+    },
+    "list-messages": {
+      "summary": "List messages",
+      "description": "Returns messages for a conversation.",
+      "operationId": "supportchat_list_messages",
+      "parameters": [
+        {
+          "name": "conversation_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {"name": "search", "in": "query", "schema": {"type": "string"}},
+        {"name": "page", "in": "query", "schema": {"type": "integer"}},
+        {"name": "rowsPerPage", "in": "query", "schema": {"type": "integer"}}
+      ],
+      "responses": {
+        "200": {
+          "description": "Message list or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/MessageListResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "404": {"$ref": "#/commonResponses/404"}
+      }
+    },
+    "reply-conversation": {
+      "summary": "Reply to conversation",
+      "description": "Adds an agent reply and reopens the conversation.",
+      "operationId": "supportchat_reply_conversation",
+      "parameters": [
+        {
+          "name": "conversation_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {"$ref": "#/schemas/ReplyConversationRequest"}
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Reply result or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/ReplyConversationResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "404": {"$ref": "#/commonResponses/404"},
+        "413": {"$ref": "#/commonResponses/413"}
+      }
+    },
+    "resolve-conversation": {
+      "summary": "Resolve conversation",
+      "description": "Marks a conversation as resolved.",
+      "operationId": "supportchat_resolve_conversation",
+      "parameters": [
+        {
+          "name": "conversation_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Resolved conversation or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/ResolveConversationResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "403": {"$ref": "#/commonResponses/403"},
+        "404": {"$ref": "#/commonResponses/404"}
+      }
+    },
+    "get-public-inbox": {
+      "summary": "Get public inbox",
+      "description": "Returns public inbox data for a visitor page.",
+      "operationId": "supportchat_get_public_inbox",
+      "parameters": [
+        {
+          "name": "inbox_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Public inbox or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/InboxResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "404": {"$ref": "#/commonResponses/404"}
+      }
+    },
+    "start-conversation": {
+      "summary": "Start conversation",
+      "description": "Creates a public visitor conversation and first message.",
+      "operationId": "supportchat_start_conversation",
+      "parameters": [
+        {
+          "name": "inbox_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {"$ref": "#/schemas/StartConversationRequest"}
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Created conversation or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/StartConversationResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "404": {"$ref": "#/commonResponses/404"},
+        "413": {"$ref": "#/commonResponses/413"}
+      }
+    },
+    "get-public-conversation": {
+      "summary": "Get public conversation",
+      "description": "Returns a public visitor conversation and messages.",
+      "operationId": "supportchat_get_public_conversation",
+      "parameters": [
+        {
+          "name": "conversation_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {"name": "page", "in": "query", "schema": {"type": "integer"}},
+        {"name": "rowsPerPage", "in": "query", "schema": {"type": "integer"}}
+      ],
+      "responses": {
+        "200": {
+          "description": "Public conversation or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/PublicConversationResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "404": {"$ref": "#/commonResponses/404"}
+      }
+    },
+    "post-public-message": {
+      "summary": "Post public message",
+      "description": "Adds a visitor message to an open conversation.",
+      "operationId": "supportchat_post_public_message",
+      "parameters": [
+        {
+          "name": "conversation_id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {"schema": {"$ref": "#/schemas/PublicMessageRequest"}}
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Created message or extension-level error.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/schemas/PublicMessageResponse"},
+                  {"$ref": "#/schemas/ApiErrorResult"}
+                ]
+              }
+            }
+          }
+        },
+        "400": {"$ref": "#/commonResponses/400"},
+        "404": {"$ref": "#/commonResponses/404"},
+        "413": {"$ref": "#/commonResponses/413"}
+      }
+    }
+  }
+}

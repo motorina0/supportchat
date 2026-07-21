@@ -82,6 +82,8 @@
       }
     }
   ],
+  "openapi": "wasm/openapi.json",
+
   "api_routes": [
     {
       "method": "POST",
