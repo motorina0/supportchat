@@ -275,7 +275,8 @@
     },
     {
       "id": "websocket.publish",
-      "description": "Publish live support chat updates to extension websocket channels."
+      "description": "Publish live support chat updates to extension websocket channels.",
+      "policies": [{"max_messages_per_second": 20}]
     },
     {
       "id": "websocket.subscribe",
